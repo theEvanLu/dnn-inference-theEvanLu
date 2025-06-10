@@ -23,15 +23,20 @@ x_train, x_test = x_train/255.0, x_test/255.0
 
 model = tf.keras.Sequential([
     tf.keras.layers.Flatten(input_shape=(28, 28)),
-    tf.keras.layers.Dense(HIDDEN1, activation='relu', name='dense1'),
-    tf.keras.layers.Dense(HIDDEN2, activation='relu', name='dense2'),
-    tf.keras.layers.Dense(10, activation='softmax', name='logits')
+    tf.keras.layers.Dense(512, activation='relu'),
+    tf.keras.layers.Dropout(0.3),
+    tf.keras.layers.Dense(256, activation='relu'),
+    tf.keras.layers.Dropout(0.3),
+    tf.keras.layers.Dense(128, activation='relu'),
+    tf.keras.layers.Dense(10, activation='softmax')
 ])
 
 model.compile(optimizer='adam',
               loss='sparse_categorical_crossentropy',
               metrics=['accuracy'])
-model.fit(x_train, y_train, epochs=EPOCHS, batch_size=BATCH_SIZE, validation_split=0.1)
+callback = tf.keras.callbacks.EarlyStopping(monitor='val_accuracy', patience=3, restore_best_weights=True)
+model.fit(x_train, y_train, epochs=40, batch_size=128, validation_split=0.1, callbacks=[callback])
+
 test_loss, test_acc = model.evaluate(x_test, y_test, verbose=0)
 print(f"Test accuracy = {test_acc:.4f}")
 
